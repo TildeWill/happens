@@ -5,8 +5,8 @@ class Person
   delegate :effective_on, :parent, :furcate_identifier, :path, to: :leaf
 
   def initialize(attributes)
-    @person_content = PersonContent.new(attributes.slice(:first_name, :last_name, :manager))
-    leaf_attributes = attributes.slice(:effective_on, :furcate_identifier).merge(person_content: @person_content)
+    @person_content = PersonContent.new(attributes.slice(*person_content_attribute_keys))
+    leaf_attributes = attributes.slice(*leaf_attribute_keys).merge(person_content: @person_content)
     @leaf = Leaf.new(leaf_attributes)
   end
 
@@ -15,9 +15,20 @@ class Person
   end
 
   def update(attributes)
+
+    person_content_attributes = @person_content.attributes.except(:id)
+    person_content_attributes = person_content_attributes
+                                  .slice(*person_content_attribute_keys)
+                                  .merge(attributes.slice(*person_content_attribute_keys))
+    @person_content = PersonContent.new(person_content_attributes)
+
     leaf_attributes = @leaf.attributes.except(:id)
-    person_attributes = @person_content.attributes.except(:id)
-    Person.new(person_attributes.merge(leaf_attributes).merge(attributes)).save
+    leaf_attributes = leaf_attributes
+                        .slice(*leaf_attribute_keys)
+                        .merge(person_content: @person_content)
+                        .merge(attributes.slice(*leaf_attribute_keys))
+    @leaf = Leaf.new(leaf_attributes)
+    save
   end
 
 
@@ -47,4 +58,12 @@ class Person
   private
   attr_accessor :person
   attr_accessor :leaf
+
+  def leaf_attribute_keys
+    [:effective_on, :furcate_identifier]
+  end
+
+  def person_content_attribute_keys
+    [:first_name, :last_name, :manager]
+  end
 end
