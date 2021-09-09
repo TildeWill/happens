@@ -2,7 +2,7 @@ class Person
   include ActiveModel::Model
 
   delegate :first_name, :last_name, :manager, to: :person
-  delegate :effective_on, :parent, :furcate_identifier, :path, to: :leaf
+  delegate :effective_on, :parent, :furcate_identifier, :path, :children, to: :leaf
 
   def initialize(attributes)
     @person_content = PersonContent.new(attributes.slice(*person_content_attribute_keys))
