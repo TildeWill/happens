@@ -16,8 +16,6 @@ RSpec.describe Person do
     expect(person.path.length).to eq(2) #because it was inserted in the middle
     expect(person.children.length).to eq(1) #because it was inserted in the middle
     expect(PersonContent.count).to eq(3)
-
-    expect(Leaf.all.map(&:furcate_identifier).uniq).not_to be_nil
   end
 
   it "maintains the furcate_identifier across multiple leaves" do
