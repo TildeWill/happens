@@ -10,21 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_03_190726) do
+ActiveRecord::Schema.define(version: 2021_09_07_212728) do
 
-  create_table "people", force: :cascade do |t|
+  create_table "leaves", force: :cascade do |t|
+    t.date "effective_on"
+    t.string "furcate_identifier"
+    t.integer "person_content_id"
+    t.text "ancestry"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["ancestry"], name: "index_leaves_on_ancestry"
+    t.index ["effective_on"], name: "index_leaves_on_effective_on"
+    t.index ["furcate_identifier"], name: "index_leaves_on_furcate_identifier"
+  end
+
+  create_table "person_contents", force: :cascade do |t|
     t.string "first_name"
     t.string "last_name"
     t.string "title"
     t.integer "manager_id"
-    t.date "effective_on"
-    t.string "version_identifier"
-    t.string "ancestry"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["ancestry"], name: "index_people_on_ancestry"
-    t.index ["effective_on"], name: "index_people_on_effective_on"
-    t.index ["version_identifier"], name: "index_people_on_version_identifier"
   end
 
 end
