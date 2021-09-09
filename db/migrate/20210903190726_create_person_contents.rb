@@ -6,7 +6,7 @@ class CreatePersonContents < ActiveRecord::Migration[6.1]
       t.string :title
       t.integer :manager_id, null: true
 
-      t.timestamps
+      t.datetime :created_at, null: false
     end
   end
 end

@@ -1,39 +1,35 @@
 class Person
   include ActiveModel::Model
 
-  delegate :first_name, :last_name, :manager, to: :person
-  delegate :effective_on, :parent, :furcate_identifier, :path, :children, to: :leaf
+  delegate :first_name, :last_name, to: :person_content
+  delegate :effective_date, :parent, :furcate_identifier, :path, :children, to: :leaf
 
   def initialize(attributes)
-    @person_content = PersonContent.new(attributes.slice(*person_content_attribute_keys))
-    leaf_attributes = attributes.slice(*leaf_attribute_keys).merge(person_content: @person_content)
-    @leaf = Leaf.new(leaf_attributes)
+    @person_content = PersonContent.new(build_person_content_attributes(attributes))
+    @leaf = Leaf.new(build_leaf_attributes(attributes))
   end
 
   def self.create(attributes)
     Person.new(attributes).save
   end
 
-  def update(attributes)
-
-    person_content_attributes = @person_content.attributes.except(:id)
-    person_content_attributes = person_content_attributes
-                                  .slice(*person_content_attribute_keys)
-                                  .merge(attributes.slice(*person_content_attribute_keys))
-    @person_content = PersonContent.new(person_content_attributes)
-
-    leaf_attributes = @leaf.attributes.except(:id)
-    leaf_attributes = leaf_attributes
-                        .slice(*leaf_attribute_keys)
-                        .merge(person_content: @person_content)
-                        .merge(attributes.slice(*leaf_attribute_keys))
-    @leaf = Leaf.new(leaf_attributes)
+  def update(new_attributes)
+    @person_content = PersonContent.new(build_person_content_attributes(new_attributes))
+    @leaf = Leaf.new(build_leaf_attributes(new_attributes))
     save
   end
 
+  def self.find_for(effective_date)
+    leaves = Leaf
+               .select(:effective_date, :furcate_identifier, :ancestry, :person_content_id)
+               .order(effective_date: :desc, created_at: :desc)
+               .where("effective_date <= ?", effective_date)
+               .group_by(&:furcate_identifier)
+               .values.map(&:first)
+  end
 
   def save
-    new_parent = Leaf.where("effective_on <= ?", @leaf.effective_on).order(effective_on: :desc).first #TODO: this will be a problem if multiple things are on the same date
+    new_parent = Leaf.where("effective_date <= ?", @leaf.effective_date).order(effective_date: :desc, created_at: :desc).first
     if new_parent
       @leaf.parent = new_parent
     else
@@ -55,15 +51,32 @@ class Person
     self
   end
 
+
   private
-  attr_accessor :person
+  attr_accessor :person_content
   attr_accessor :leaf
 
   def leaf_attribute_keys
-    [:effective_on, :furcate_identifier]
+    [:effective_date, :furcate_identifier]
+  end
+
+  def build_leaf_attributes(new_attributes)
+    {
+      effective_date: new_attributes[:effective_date] || @leaf&.effective_date,
+      furcate_identifier: new_attributes[:furcate_identifier] || @leaf&.furcate_identifier,
+      person_content: @person_content
+    }
+  end
+
+  def build_person_content_attributes(new_attributes)
+    {
+      first_name: new_attributes[:first_name] || @person_content&.first_name,
+      last_name: new_attributes[:last_name] || @person_content&.last_name,
+      manager: new_attributes[:manager].instance_variable_get(:@manager) || @person_content&.manager
+    }
   end
 
   def person_content_attribute_keys
-    [:first_name, :last_name, :manager]
+    [:first_name, :last_name]
   end
 end

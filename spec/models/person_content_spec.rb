@@ -2,9 +2,9 @@ require 'rails_helper'
 
 RSpec.describe PersonContent, type: :model do
   it "let's the developer create a linked list of changes to a Person" do
-    boss = PersonContent.create(first_name: "The", last_name: "Shredder", title: "Head Boss", effective_on: Date.today)
+    boss = PersonContent.create(first_name: "The", last_name: "Shredder", title: "Head Boss", effective_date: Date.today)
     boss.title = "Mega Boss"
-    boss.effective_on = Date.tomorrow
+    boss.effective_date = Date.tomorrow
     boss.parent = boss
     Arborist.update(boss)
 
@@ -13,12 +13,12 @@ RSpec.describe PersonContent, type: :model do
   end
 
   it "can finds the leaf for the right time on or before a certain date" do
-    boss = PersonContent.create!(title: "Head Boss1", effective_on: 1.day.from_now)
+    boss = PersonContent.create!(title: "Head Boss1", effective_date: 1.day.from_now)
     boss.title = "Head Boss2"
-    boss.effective_on = 2.days.from_now
+    boss.effective_date = 2.days.from_now
     Arborist.update(boss)
     boss.title = "Head Boss3"
-    boss.effective_on = 3.days.from_now
+    boss.effective_date = 3.days.from_now
     Arborist.update(boss)
 
     leaf = PersonContent.for(1.day.from_now).first
