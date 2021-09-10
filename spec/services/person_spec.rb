@@ -29,7 +29,7 @@ RSpec.describe Person do
     expect(person.path.length).to eq(3) #because it was inserted in the middle
     expect(person.children.length).to eq(1) #because it was inserted in the middle
 
-    leaves = Person.find_for(3.day.from_now.to_date)
+    leaves = Person.find_for(3.days.from_now.to_date)
     expect(leaves.length).to eq(2)
   end
 

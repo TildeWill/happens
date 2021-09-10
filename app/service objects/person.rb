@@ -21,6 +21,7 @@ class Person
 
   def self.find_for(effective_date)
     leaves = Leaf
+               .eager_load(:person_content)
                .select(:effective_date, :furcate_identifier, :ancestry, :person_content_id)
                .order(effective_date: :desc, created_at: :desc)
                .where("effective_date <= ?", effective_date)
@@ -56,10 +57,6 @@ class Person
   attr_accessor :person_content
   attr_accessor :leaf
 
-  def leaf_attribute_keys
-    [:effective_date, :furcate_identifier]
-  end
-
   def build_leaf_attributes(new_attributes)
     {
       effective_date: new_attributes[:effective_date] || @leaf&.effective_date,
@@ -74,9 +71,5 @@ class Person
       last_name: new_attributes[:last_name] || @person_content&.last_name,
       manager: new_attributes[:manager].instance_variable_get(:@manager) || @person_content&.manager
     }
-  end
-
-  def person_content_attribute_keys
-    [:first_name, :last_name]
   end
 end
